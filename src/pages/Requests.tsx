@@ -6,8 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDate, calculateLeaveDays, getLeaveTypeLabel, getStatusBadgeColor } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Calendar, Clock } from 'lucide-react';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PlusCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import NewRequestDialog from '@/components/NewRequestDialog';
 
 const Requests = () => {
@@ -85,7 +85,7 @@ const Requests = () => {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">Status</div>
-                  <Badge variant="outline" className={getStatusBadgeColor(selectedRequestDetails.status)}>
+                  <Badge className={getStatusBadgeColor(selectedRequestDetails.status)}>
                     {selectedRequestDetails.status.charAt(0).toUpperCase() + selectedRequestDetails.status.slice(1)}
                   </Badge>
                 </div>
@@ -191,7 +191,7 @@ const RequestsTable = ({ requests, onSelectRequest }: RequestsTableProps) => {
                     {calculateLeaveDays(new Date(request.startDate), new Date(request.endDate))}
                   </td>
                   <td className="py-3 px-4 text-sm">
-                    <Badge variant="outline" className={getStatusBadgeColor(request.status)}>
+                    <Badge className={getStatusBadgeColor(request.status)}>
                       {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                     </Badge>
                   </td>

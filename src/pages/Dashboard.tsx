@@ -120,7 +120,7 @@ const Dashboard = () => {
                         {calculateLeaveDays(new Date(request.startDate), new Date(request.endDate))}
                       </td>
                       <td className="py-3 px-4 text-sm">
-                        <Badge variant="outline" className={getStatusBadgeColor(request.status)}>
+                        <Badge className={getStatusBadgeColor(request.status)}>
                           {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                         </Badge>
                       </td>

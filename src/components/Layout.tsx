@@ -103,7 +103,7 @@ const Layout = ({ children }: LayoutProps) => {
         
         <div className="flex-1">
           <header className="flex items-center h-14 border-b px-4 lg:px-6">
-            <SidebarTrigger asChild>
+            <SidebarTrigger>
               <Button variant="ghost" size="icon">
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle Sidebar</span>

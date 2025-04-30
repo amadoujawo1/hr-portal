@@ -1,34 +1,46 @@
 
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
-import { format, differenceInDays, eachDayOfInterval, isWeekend } from "date-fns"
-import { LeaveType } from "@/types"
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { LeaveType } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
-}
-
-export function getInitials(name: string): string {
-  return name
-    .split(' ')
-    .map(part => part[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2);
+  return twMerge(clsx(inputs));
 }
 
 export function formatDate(date: Date): string {
-  return format(date, 'MMM d, yyyy');
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
 }
 
 export function calculateLeaveDays(startDate: Date, endDate: Date): number {
-  const days = differenceInDays(endDate, startDate) + 1;
+  // Clone the dates to avoid modifying the original objects
+  const start = new Date(startDate);
+  const end = new Date(endDate);
   
-  // If we want to exclude weekends
-  const allDays = eachDayOfInterval({ start: startDate, end: endDate });
-  const businessDays = allDays.filter(day => !isWeekend(day));
+  // Set times to midnight to ensure we're only counting days
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
   
-  return businessDays.length;
+  // Calculate difference in days
+  const diffTime = Math.abs(end.getTime() - start.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end days
+  
+  // Count only business days (Monday to Friday)
+  let businessDays = 0;
+  const currentDate = new Date(start);
+  
+  while (currentDate <= end) {
+    const dayOfWeek = currentDate.getDay();
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      businessDays++;
+    }
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  return businessDays;
 }
 
 export function getLeaveTypeLabel(type: LeaveType): string {
@@ -45,39 +57,31 @@ export function getLeaveTypeLabel(type: LeaveType): string {
 
 export function getLeaveTypeColor(type: LeaveType): string {
   const colors: Record<LeaveType, string> = {
-    vacation: 'bg-blue-100 text-blue-800',
-    sick: 'bg-red-100 text-red-800',
-    personal: 'bg-green-100 text-green-800',
-    bereavement: 'bg-purple-100 text-purple-800',
-    other: 'bg-gray-100 text-gray-800'
+    vacation: 'text-blue-600 bg-blue-50',
+    sick: 'text-red-600 bg-red-50',
+    personal: 'text-amber-600 bg-amber-50',
+    bereavement: 'text-purple-600 bg-purple-50',
+    other: 'text-slate-600 bg-slate-50'
   };
   
-  return colors[type] || 'bg-gray-100 text-gray-800';
+  return colors[type] || '';
 }
 
-export function getStatusColor(status: string): string {
+export function getStatusBadgeColor(status: string): string {
   const colors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    approved: 'bg-green-100 text-green-800',
-    rejected: 'bg-red-100 text-red-800'
+    pending: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
+    approved: 'bg-green-100 text-green-800 hover:bg-green-200',
+    rejected: 'bg-red-100 text-red-800 hover:bg-red-200'
   };
   
-  return colors[status] || 'bg-gray-100 text-gray-800';
+  return colors[status] || '';
 }
 
-export function getStatusBadgeColor(status: string): Record<string, boolean> {
-  switch(status) {
-    case 'pending':
-      return { 'bg-yellow-100 text-yellow-800 border-yellow-300': true };
-    case 'approved':
-      return { 'bg-green-100 text-green-800 border-green-300': true };
-    case 'rejected':
-      return { 'bg-red-100 text-red-800 border-red-300': true };
-    default:
-      return { 'bg-gray-100 text-gray-800 border-gray-300': true };
-  }
-}
-
-export function generateId(): string {
-  return Math.random().toString(36).substring(2, 9);
+export function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .substring(0, 2);
 }
