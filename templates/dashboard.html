@@ -6,6 +6,11 @@
 </head>
 <body>
     <h1>Dashboard</h1>
+    <nav>
+        <a href="{{ url_for('profile') }}">Profile</a> |
+        <a href="{{ url_for('apply_leave') }}">Apply for Leave</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
     <a href="{{ url_for('apply_leave') }}">Apply for Leave</a>
     <h2>Leave Applications</h2>
     <table border="1">

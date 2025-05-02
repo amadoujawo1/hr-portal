@@ -32,6 +32,52 @@ class Leave(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        
+        if user and user.password == password:  # In production, use proper password hashing
+            login_user(user)
+            return redirect(url_for('dashboard'))
+        flash('Invalid username or password')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        is_hr = 'is_hr' in request.form
+        
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists')
+            return redirect(url_for('register'))
+            
+        user = User(username=username, password=password, is_hr=is_hr)
+        db.session.add(user)
+        db.session.commit()
+        flash('Registration successful')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@app.route('/profile')
+@login_required
+def profile():
+    leave_count = Leave.query.filter_by(
+        user_id=current_user.id,
+        status='Approved'
+    ).count()
+    return render_template('profile.html', leave_count=leave_count)
+
 @app.route('/')
 @login_required
 def dashboard():

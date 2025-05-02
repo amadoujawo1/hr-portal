@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - Leave Management</title>
+</head>
+<body>
+    <h1>Profile</h1>
+    <p>Username: {{ current_user.username }}</p>
+    <p>Role: {% if current_user.is_hr %}HR Staff{% else %}Employee{% endif %}</p>
+    <p>Approved Leaves: {{ leave_count }}</p>
+    <p><a href="{{ url_for('dashboard') }}">Back to Dashboard</a></p>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>
