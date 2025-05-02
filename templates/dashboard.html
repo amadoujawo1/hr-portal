@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Leave Management - Dashboard</title>
+</head>
+<body>
+    <h1>Dashboard</h1>
+    <a href="{{ url_for('apply_leave') }}">Apply for Leave</a>
+    <h2>Leave Applications</h2>
+    <table border="1">
+        <tr>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Reason</th>
+            <th>Status</th>
+            {% if current_user.is_hr %}
+            <th>Employee</th>
+            <th>Actions</th>
+            {% endif %}
+        </tr>
+        {% for leave in leaves %}
+        <tr>
+            <td>{{ leave.start_date }}</td>
+            <td>{{ leave.end_date }}</td>
+            <td>{{ leave.reason }}</td>
+            <td>{{ leave.status }}</td>
+            {% if current_user.is_hr %}
+            <td>{{ leave.employee.username }}</td>
+            <td>
+                {% if leave.status == 'Pending' %}
+                <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}">Approve</a>
+                <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}">Reject</a>
+                {% endif %}
+            </td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
