@@ -1,46 +1,113 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Leave Management - Dashboard</title>
-</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HR Portal - Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 <body>
-    <h1>Dashboard</h1>
-    <nav>
-        <a href="{{ url_for('profile') }}">Profile</a> |
-        <a href="{{ url_for('apply_leave') }}">Apply for Leave</a> |
-        <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
-    <a href="{{ url_for('apply_leave') }}">Apply for Leave</a>
-    <h2>Leave Applications</h2>
-    <table border="1">
-        <tr>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Reason</th>
-            <th>Status</th>
-            {% if current_user.is_hr %}
-            <th>Employee</th>
-            <th>Actions</th>
+    <aside class="sidebar">
+        <h2>HR Portal</h2>
+        <div class="user-profile">
+            <div class="user-avatar">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ current_user.name }}</span>
+                <span class="user-role">{% if current_user.is_admin %}Admin{% elif current_user.is_hr %}HR Manager{% else %}Employee{% endif %}</span>
+            </div>
+        </div>
+        <nav>
+            <a href="{{ url_for('dashboard') }}" class="nav-link active">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                Dashboard
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                Profile
+            </a>
+            <a href="{{ url_for('apply_leave') }}" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                Apply Leave
+            </a>
+            {% if current_user.is_admin %}
+            <a href="{{ url_for('admin') }}" class="nav-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                User Management
+            </a>
             {% endif %}
-        </tr>
-        {% for leave in leaves %}
-        <tr>
-            <td>{{ leave.start_date }}</td>
-            <td>{{ leave.end_date }}</td>
-            <td>{{ leave.reason }}</td>
-            <td>{{ leave.status }}</td>
-            {% if current_user.is_hr %}
-            <td>{{ leave.employee.username }}</td>
-            <td>
-                {% if leave.status == 'Pending' %}
-                <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}">Approve</a>
-                <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}">Reject</a>
-                {% endif %}
-            </td>
-            {% endif %}
-        </tr>
-        {% endfor %}
-    </table>
+        </nav>
+    </aside>
+
+    <header class="header">
+        <div class="header-brand">
+            <img src="{{ url_for('static', filename='images/sp image.jpg') }}" alt="Securiport Logo" class="header-logo">
+            <h1 class="header-company">HR Portal</h1>
+        </div>
+        <div class="notification-icon" style="position: relative;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg>
+            <span id="notification-badge" style="display: none;">0</span>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="notification-container" id="notification-container"></div>
+
+        
+
+        <div class="card">
+            <h2>Recent Leave Requests</h2>
+            <div class="table-container">
+
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Leave Applications</h2>
+                <a href="{{ url_for('apply_leave') }}" class="btn btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New Leave Request
+                </a>
+            </div>
+            
+            <div class="table-container">
+                <table class="leave-table">
+                    <thead>
+                        <tr>
+                            <th class="table-header">Start Date</th>
+                            <th class="table-header">End Date</th>
+                            <th class="table-header">Reason</th>
+                            <th class="table-header">Status</th>
+                            {% if current_user.is_hr %}
+                            <th class="table-header">Employee</th>
+                            <th class="table-header">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for leave in leaves %}
+                        <tr>
+                            <td>{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ leave.reason }}</td>
+                            <td class="leave-status status-{{ leave.status.lower() }}">{{ leave.status }}</td>
+                            <td>{{ leave.employee.username }}</td>
+                            {% if current_user.is_hr and leave.status == 'Pending' %}
+                            <td class="actions">
+                                <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-primary">Approve</a>
+                                <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}" class="btn btn-danger">Reject</a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </body>
 </html>

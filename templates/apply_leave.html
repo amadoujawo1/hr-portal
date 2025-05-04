@@ -3,24 +3,113 @@
 <html>
 <head>
     <title>Apply for Leave</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+    <script src="{{ url_for('static', filename='js/leave-management.js') }}"></script>
 </head>
 <body>
-    <h1>Apply for Leave</h1>
-    <form method="POST">
-        <p>
-            <label>Start Date:</label>
-            <input type="date" name="start_date" required>
-        </p>
-        <p>
-            <label>End Date:</label>
-            <input type="date" name="end_date" required>
-        </p>
-        <p>
-            <label>Reason:</label>
-            <textarea name="reason" required></textarea>
-        </p>
-        <button type="submit">Submit</button>
-    </form>
-    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    <div class="sidebar">
+        <a href="{{ url_for('dashboard') }}" class="nav-link">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            Dashboard
+        </a>
+    </div>
+
+    <div class="header">
+        <div class="header-brand">
+            <img src="{{ url_for('static', filename='images/sp image.jpg') }}" alt="Securiport Logo" class="header-logo">
+        </div>
+        <h1>Apply for Leave</h1>
+    </div>
+
+    <div class="main-content">
+        <div class="card">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {% if category == 'success' %}flash-success{% else %}flash-error{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="form-columns">
+                <div class="form-column">
+                    <div id="leave-balance" class="leave-balance card-section">
+                        <h2>Leave Balance</h2>
+                    </div>
+
+                    <div class="calendar-wrapper card-section">
+                        <h2>Leave Calendar</h2>
+                        <div id="leave-calendar"></div>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <form method="POST" class="leave-form" enctype="multipart/form-data">
+                        <div class="form-section">
+                            <h2>Leave Details</h2>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label">Start Date</label>
+                                    <input type="date" id="start_date" name="start_date" class="form-control" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">End Date</label>
+                                    <input type="date" id="end_date" name="end_date" class="form-control" required>
+                                </div>
+                                <div class="form-group full-width">
+                                    <label class="form-label">Leave Type</label>
+                                    <select name="leave_type" class="form-control" required>
+                                        <option value="" disabled selected>Select leave type</option>
+                                        <option value="annual">Annual Leave</option>
+                                        <option value="sick">Sick Leave</option>
+                                        <option value="maternity">Maternity Leave</option>
+                                        <option value="paternity">Paternity Leave</option>
+                                        <option value="others">Others</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div id="leave-duration" class="text-muted mb-3"></div>
+                        </div>
+
+                        <div class="form-section">
+                            <h2>Additional Information</h2>
+                            <div class="form-group">
+                                <label class="form-label">Reason for Leave</label>
+                                <textarea name="reason" class="form-control" rows="4" required placeholder="Please provide details about your leave request"></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Supporting Documents</label>
+                                <input type="file" id="file-input" name="documents[]" multiple style="display: none">
+                                <div id="document-upload" class="document-upload">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    <p>Drag and drop files here or click to upload</p>
+                                </div>
+                                <div id="document-preview" class="document-preview"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary submit-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Submit Leave Request
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
 </body>
 </html>
