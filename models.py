@@ -6,6 +6,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
+    employee_id = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
     department = db.Column(db.String(50), nullable=True)
     is_hr = db.Column(db.Boolean, default=False)
@@ -23,6 +24,7 @@ class Leave(db.Model):
     reason = db.Column(db.String(200), nullable=False)
     status = db.Column(db.String(20), default='Pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    employee_id = db.Column(db.String(20), nullable=False)
     documents = db.relationship('Document', backref='leave', lazy=True)
 
 class Document(db.Model):

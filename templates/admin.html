@@ -187,20 +187,27 @@
                 <table class="leave-table">
                     <thead>
                         <tr>
+                            <th>Employee ID</th>
                             <th>Employee Name</th>
                             <th>Start Date</th>
                             <th>End Date</th>
+                            <th>Duration in Months</th>
+                            <th>Days</th>
                             <th>Reason</th>
                             <th>Status</th>
+                            <th>Employee</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for leave in leaves %}
                         <tr>
+                            <td>{{ leave.employee.id }}</td>
                             <td>{{ leave.employee.username }}</td>
                             <td class="date-column">{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
                             <td class="date-column">{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ ((leave.end_date.year - leave.start_date.year) * 12 + leave.end_date.month - leave.start_date.month) }}</td>
+                            <td>{{ (leave.end_date - leave.start_date).days + 1 }}</td>
                             <td class="reason-column">{{ leave.reason }}</td>
                             <td>
                                 <span class="badge {% if leave.status == 'Approved' %}badge-success{% elif leave.status == 'Rejected' %}badge-danger{% else %}badge-warning{% endif %}">
@@ -237,7 +244,8 @@
                     <thead>
                         <tr>
                             <th class="col-group-identity">Identity</th>
-                            <th class="col-group-role">Role & Status</th>
+                            <th class="col-group-role">Role</th>
+                            <th class="col-group-status">Status</th>
                             <th class="col-group-actions">Actions</th>
                         </tr>
                     </thead>
@@ -258,17 +266,17 @@
                                 </div>
                             </td>
                             <td class="col-group-role">
-                                <div class="role-status-container">
-                                    <div class="role-badge">
-                                        <span class="badge {% if user.is_hr %}badge-success{% else %}badge-warning{% endif %}">
-                                            {% if user.is_hr %}HR Staff{% else %}Employee{% endif %}
-                                        </span>
-                                    </div>
-                                    <div class="status-badge">
-                                        <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                            {% if user.is_active %}Active{% else %}Inactive{% endif %}
-                                        </span>
-                                    </div>
+                                <div class="role-badge">
+                                    <span class="badge {% if user.is_hr %}badge-success{% else %}badge-warning{% endif %}">
+                                        {% if user.is_hr %}HR Staff{% else %}Employee{% endif %}
+                                    </span>
+                                </div>
+                            </td>
+                            <td class="col-group-status">
+                                <div class="status-badge">
+                                    <span class="badge {% if user.is_active %}badge-success{% else %}badge-danger{% endif %}">
+                                        {% if user.is_active %}Active{% else %}Inactive{% endif %}
+                                    </span>
                                 </div>
                             </td>
                             <td class="col-group-actions">

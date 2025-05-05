@@ -21,13 +21,17 @@ db.init_app(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
+# Create database tables and admin user at startup
+with app.app_context():
+    db.create_all()
+
 def create_admin_user():
     with app.app_context():
         # Drop all tables and recreate them
         db.drop_all()
         db.create_all()
         # Create admin user
-        admin = User(username='admin', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
+        admin = User(username='admin', employee_id='ADMIN001', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
         db.session.add(admin)
         db.session.commit()
 
@@ -43,13 +47,18 @@ def register():
         username = request.form['username']
         password = request.form['password']
         department = request.form['department']
+        employee_id = request.form['employee_id']
         is_hr = request.form.get('is_hr') == 'true'
         
         if User.query.filter_by(username=username).first():
             flash('Username already exists', 'error')
             return redirect(url_for('register'))
+            
+        if User.query.filter_by(employee_id=employee_id).first():
+            flash('Employee ID already exists', 'error')
+            return redirect(url_for('register'))
         
-        user = User(username=username, password=password, department=department, is_hr=is_hr)
+        user = User(username=username, password=password, department=department, employee_id=employee_id, is_hr=is_hr)
         db.session.add(user)
         db.session.commit()
         flash('Registration successful! Please login.', 'success')
@@ -81,11 +90,21 @@ def add_user():
     if User.query.filter_by(username=username).first():
         flash('Username already exists', 'error')
         return redirect(url_for('admin'))
-        
-    user = User(username=username, password=password, department=department, is_hr=is_hr)
+    
+    # Generate employee ID based on department and current timestamp
+    dept_prefix = ''.join(word[0].upper() for word in department.split())
+    timestamp = datetime.now().strftime('%y%m%d%H%M')
+    employee_id = f"{dept_prefix}{timestamp}"
+    
+    # Ensure employee_id is unique
+    while User.query.filter_by(employee_id=employee_id).first():
+        timestamp = str(int(timestamp) + 1)
+        employee_id = f"{dept_prefix}{timestamp}"
+    
+    user = User(username=username, password=password, department=department, employee_id=employee_id, is_hr=is_hr)
     db.session.add(user)
     db.session.commit()
-    flash('User added successfully', 'success')
+    flash(f'User added successfully with Employee ID: {employee_id}', 'success')
     return redirect(url_for('admin'))
 
 @app.route('/logout')
@@ -192,7 +211,8 @@ def apply_leave():
         reason = request.form['reason']
         
         leave = Leave(start_date=start_date, end_date=end_date, 
-                     reason=reason, user_id=current_user.id)
+                     reason=reason, user_id=current_user.id,
+                     employee_id=current_user.employee_id)
         db.session.add(leave)
         db.session.commit()
         flash('Leave application submitted successfully!', 'success')
