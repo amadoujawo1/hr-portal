@@ -85,11 +85,11 @@
                             <th class="table-header">End Date</th>
                             <th class="table-header">Duration (Months)</th>
                             <th class="table-header">Duration (Days)</th>
+                            <th class="table-header">Employee Name</th>
                             <th class="table-header">Employee ID</th>
                             <th class="table-header">Reason</th>
                             <th class="table-header">Status</th>
                             {% if current_user.is_hr %}
-                            <th class="table-header">Employee</th>
                             <th class="table-header">Actions</th>
                             {% endif %}
                         </tr>
@@ -101,10 +101,10 @@
                             <td>{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
                             <td>{{ ((leave.end_date - leave.start_date).days / 30.44) | round(1) }}</td>
                             <td>{{ (leave.end_date - leave.start_date).days }}</td>
-                            <td>{{ leave.employee.id }}</td>
+                            <td>{{ leave.employee_name }}</td>
+                            <td>{{ leave.employee_id }}</td>
                             <td>{{ leave.reason }}</td>
                             <td class="leave-status status-{{ leave.status.lower() }}">{{ leave.status }}</td>
-                            <td>{{ leave.employee.username }}</td>
                             {% if current_user.is_hr and leave.status == 'Pending' %}
                             <td class="actions">
                                 <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-primary">Approve</a>

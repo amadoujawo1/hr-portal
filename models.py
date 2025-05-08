@@ -25,6 +25,7 @@ class Leave(db.Model):
     status = db.Column(db.String(20), default='Pending')
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     employee_id = db.Column(db.String(20), nullable=False)
+    employee_name = db.Column(db.String(100), nullable=True)
     documents = db.relationship('Document', backref='leave', lazy=True)
 
 class Document(db.Model):

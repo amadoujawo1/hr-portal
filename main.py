@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from datetime import datetime
 from functools import wraps
 from flask_socketio import SocketIO, emit
+from flask_migrate import Migrate
 from database import db
 from models import User, Leave, Document, Notification
 from utils import save_document, delete_document, allowed_file, UPLOAD_FOLDER, requires_admin
@@ -11,31 +12,39 @@ import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hrportal.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://jawo:abc_123@localhost/hrportal'
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 20
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_POOL_SIZE'] = 10
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 5
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 socketio = SocketIO(app)
 
 db.init_app(app)
+migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# Create database tables and admin user at startup
-with app.app_context():
-    db.create_all()
-
-def create_admin_user():
+# Initialize database and create admin user if needed
+def init_database():
     with app.app_context():
-        # Drop all tables and recreate them
-        db.drop_all()
+        # Create all tables if they don't exist
         db.create_all()
-        # Create admin user
-        admin = User(username='admin', employee_id='ADMIN001', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
-        db.session.add(admin)
-        db.session.commit()
+        
+        # Initialize migrations
+        migrate.init_app(app, db)
+        
+        # Create admin user if it doesn't exist
+        admin = User.query.filter_by(username='admin').first()
+        if not admin:
+            admin = User(username='admin', employee_id='ADMIN001', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
+            db.session.add(admin)
+            db.session.commit()
 
-create_admin_user()
+# Initialize database
+init_database()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -210,9 +219,12 @@ def apply_leave():
         end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d')
         reason = request.form['reason']
         
+        employee_name = request.form['employee_name']
+        employee_id = request.form['employee_id']
         leave = Leave(start_date=start_date, end_date=end_date, 
                      reason=reason, user_id=current_user.id,
-                     employee_id=current_user.employee_id)
+                     employee_id=employee_id,
+                     employee_name=employee_name)
         db.session.add(leave)
         db.session.commit()
         flash('Leave application submitted successfully!', 'success')
