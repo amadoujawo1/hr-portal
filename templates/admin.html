@@ -17,8 +17,20 @@
     <div class="header">
         <div class="header-brand">
             <img src="{{ url_for('static', filename='images/sp image.jpg') }}" alt="Securiport Logo" class="header-logo">
+            <h1 class="header-title">User Management</h1>
         </div>
-        <h1>User Management</h1>
+        <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <div class="fw-bold">{{ current_user.name }}</div>
+                <div class="text-muted small">{{ current_user.role }}</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm d-flex align-items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </a>
+        </div>
     </div>
 
     <div class="main-content">
@@ -32,13 +44,14 @@
 
         <div class="card">
             <h2>Add New User</h2>
-            <form method="POST" action="{{ url_for('add_user') }}" class="modern-form" onsubmit="return validateForm(event);">
+            <form method="POST" action="{{ url_for('register') }}" class="modern-form" onsubmit="return validateForm(event);">
                 <div class="form-grid-container">
                     <div class="form-section">
                         <h3 class="section-title">Account Information</h3>
+                        
                         <div class="form-group">
                             <label class="form-label" for="username">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                                 Username
                             </label>
                             <input type="text" id="username" name="username" class="form-control modern-input" required minlength="3" maxlength="50" pattern="[a-zA-Z0-9_]+" title="Username can only contain letters, numbers, and underscores">
@@ -50,7 +63,7 @@
                         <h3 class="section-title">Security</h3>
                         <div class="form-group">
                             <label class="form-label" for="password">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                                 Password
                             </label>
                             <div class="password-input-container modern-input-group">
@@ -65,7 +78,7 @@
 
                         <div class="form-group">
                             <label class="form-label" for="confirm_password">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                                 Confirm Password
                             </label>
                             <div class="password-input-container modern-input-group">
@@ -82,7 +95,7 @@
                         <h3 class="section-title">Role & Department</h3>
                         <div class="form-group">
                             <label class="form-label" for="role">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                                 User Role
                             </label>
                             <select id="role" name="is_hr" class="form-control modern-select" required>
@@ -94,7 +107,7 @@
 
                         <div class="form-group">
                             <label class="form-label" for="department">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a5568" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                                 Department
                             </label>
                             <select id="department" name="department" class="form-control modern-select" required>
@@ -181,60 +194,9 @@
             </script>
         </div>
 
-        <div class="card">
-            <h2>Leave Applications</h2>
-            <div class="table-container">
-                <table class="leave-table">
-                    <thead>
-                        <tr>
-                            <th class="table-header">Employee ID</th>
-                            <th class="table-header">Employee Name</th>
-                            <th class="table-header">Start Date</th>
-                            <th class="table-header">End Date</th>
-                            <th class="table-header">Duration (Months)</th>
-                            <th class="table-header">Duration (Days)</th>
-                            <th class="table-header">Reason</th>
-                            <th class="table-header">Status</th>
-                            <th class="table-header">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for leave in leaves %}
-                        <tr>
-                            <td>{{ leave.employee.id }}</td>
-                            <td>{{ leave.employee.username }}</td>
-                            <td class="date-column">{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
-                            <td class="date-column">{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ ((leave.end_date.year - leave.start_date.year) * 12 + leave.end_date.month - leave.start_date.month) }}</td>
-                            <td>{{ (leave.end_date - leave.start_date).days + 1 }}</td>
-                            <td class="reason-column">{{ leave.reason }}</td>
-                            <td>
-                                <span class="badge {% if leave.status == 'Approved' %}badge-success{% elif leave.status == 'Rejected' %}badge-danger{% else %}badge-warning{% endif %}">
-                                    {{ leave.status }}
-                                </span>
-                            </td>
-                            <td class="actions">
-                                {% if leave.status == 'Pending' %}
-                                <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-success">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#22c55e" width="16" height="16">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Approve
-                                </a>
-                                <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}" class="btn btn-danger">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444" width="16" height="16">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    Reject
-                                </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+
+
+
 
         <div class="card user-management-card">
             <h2>User Management</h2>
@@ -254,7 +216,7 @@
                             <td class="col-group-identity">
                                 <div class="user-identity">
                                     <div class="user-avatar">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#4a5568">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="#e2e8f0" viewBox="0 0 24 24" stroke="#4a5568">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
@@ -282,7 +244,7 @@
                                 <div class="action-buttons">
                                     <form method="POST" action="{{ url_for('toggle_user_role', user_id=user.id) }}" class="action-form">
                                         <button type="submit" class="btn btn-sm btn-warning" title="Toggle Role">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#d97706" width="16" height="16">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#fbbf24" width="16" height="16">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                             </svg>
                                             <span>Role</span>
@@ -290,7 +252,7 @@
                                     </form>
                                     <form method="POST" action="{{ url_for('toggle_user_status', user_id=user.id) }}" class="action-form">
                                         <button type="submit" class="btn btn-sm btn-primary" title="Toggle Status">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#3b82f6" width="16" height="16">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#60a5fa" width="16" height="16">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
                                             <span>Status</span>
@@ -298,7 +260,7 @@
                                     </form>
                                     <form method="POST" action="{{ url_for('reset_password', user_id=user.id) }}" class="action-form">
                                         <button type="submit" class="btn btn-sm btn-info" title="Reset Password">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#0ea5e9" width="16" height="16">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#38bdf8" width="16" height="16">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                                             </svg>
                                             <span>Reset</span>
@@ -306,7 +268,7 @@
                                     </form>
                                     <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" class="action-form" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                                         <button type="submit" class="btn btn-sm btn-danger" title="Delete User">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="16" height="16">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#ef4444" width="16" height="16">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                             <span>Delete</span>
@@ -329,7 +291,12 @@
         padding: 2rem;
         background: #fff;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease;
+    }
+
+    .modern-form:hover {
+        transform: translateY(-2px);
     }
 
     .form-grid-container {
@@ -376,6 +343,7 @@
         color: #6c757d;
     }
 
+    .form-control,
     .modern-input,
     .modern-select {
         width: 100%;
@@ -437,6 +405,7 @@
         transition: all 0.2s;
     }
 
+    .btn,
     .modern-submit-btn {
         width: 100%;
         padding: 1rem;
@@ -540,11 +509,32 @@
         width: 100%;
         border-collapse: separate;
         border-spacing: 0;
-        margin: 1rem 0;
-        background: white;
-        border-radius: 8px;
+        margin-top: 1.5rem;
+        background: #ffffff;
+        border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-table th,
+    .user-table td {
+        padding: 1.25rem;
+        text-align: left;
+        border-bottom: 1px solid #e2e8f0;
+        transition: background-color 0.2s ease;
+    }
+
+    .user-table th {
+        background: #f8fafc;
+        font-weight: 600;
+        color: #1a202c;
+        text-transform: uppercase;
+        font-size: 0.875rem;
+        letter-spacing: 0.05em;
+    }
+
+    .user-table tr:hover td {
+        background-color: #f8fafc;
     }
 
     .user-table th {

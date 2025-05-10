@@ -7,30 +7,27 @@
     <title>HR Portal - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notifications.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="{{ url_for('static', filename='js/mobile-menu.js') }}"></script>
 <body>
     <aside class="sidebar">
-        <h2>HR Portal</h2>
-        <div class="user-profile">
-            <div class="user-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-            </div>
-            <div class="user-info">
-                <span class="user-name">{{ current_user.name }}</span>
-                <span class="user-role">{% if current_user.is_admin %}Admin{% elif current_user.is_hr %}HR Manager{% else %}Employee{% endif %}</span>
+    <div class="flex items-center justify-between mb-8 transition-opacity duration-300">
+        <div class="flex items-center space-x-4">
+            <!-- <img src="{{ url_for('static', filename='images/sp image.jpg') }}" alt="Profile" class="w-10 h-10 rounded-full"> -->
+            <div class="sidebar-text">
+                <h2 class="text-white font-semibold">{{ current_user.name }}</h2>
+                <p class="text-blue-200 text-sm">{{ current_user.department }}</p>
             </div>
         </div>
-        <nav>
+    </div>
+    <nav>
             <a href="{{ url_for('dashboard') }}" class="nav-link active">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 Dashboard
             </a>
-            <a href="{{ url_for('profile') }}" class="nav-link">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                Profile
-            </a>
+
             <a href="{{ url_for('apply_leave') }}" class="nav-link">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
                 Apply Leave
@@ -49,46 +46,54 @@
             <img src="{{ url_for('static', filename='images/sp image.jpg') }}" alt="Securiport Logo" class="header-logo">
             <h1 class="header-company">HR Portal</h1>
         </div>
-        <div class="notification-icon" style="position: relative;">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-            </svg>
-            <span id="notification-badge" style="display: none;">0</span>
+        <div class="d-flex align-items-center gap-3">
+            <div class="notification-icon" style="position: relative;">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span id="notification-badge" style="display: none;">0</span>
+            </div>
+            <div class="text-end">
+                <div class="fw-bold">{{ current_user.name }}</div>
+                <div class="text-muted small">{{ current_user.role }}</div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger d-flex align-items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </a>
         </div>
     </header>
 
     <main class="main-content">
         <div class="notification-container" id="notification-container"></div>
 
-        
 
-        
-
-        <div class="card">
-            <h2>Recent Leave Requests</h2>
-            <div class="table-container">
-
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2>Leave Applications</h2>
-                <a href="{{ url_for('apply_leave') }}" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                    New Leave Request
-                </a>
+        <div class="card shadow-sm rounded-lg overflow-hidden">
+            <div class="card-header bg-white py-4 px-5 border-bottom-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="h4 mb-0 text-primary">Leave Applications</h2>
+                    <a href="{{ url_for('apply_leave') }}" class="btn btn-primary d-flex align-items-center gap-2 hover-scale transition-transform">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                        New Leave Request
+                    </a>
+                </div>
             </div>
             
-            <div class="table-container">
-                <table class="leave-table">
-                    <thead>
+            <div class="table-container p-5 pt-0">
+                <table class="leave-table table table-hover align-middle mb-0">
+                    <thead class="bg-light">
                         <tr>
-                            <th class="table-header">Start Date</th>
-                            <th class="table-header">End Date</th>
-                            <th class="table-header">Duration (Months)</th>
-                            <th class="table-header">Duration (Days)</th>
-                            <th class="table-header">Employee Name</th>
-                            <th class="table-header">Employee ID</th>
-                            <th class="table-header">Reason</th>
-                            <th class="table-header">Status</th>
+                            <th class="table-header fw-semibold text-muted">Start Date</th>
+                            <th class="table-header fw-semibold text-muted">End Date</th>
+                            <th class="table-header fw-semibold text-muted">Duration (Months)</th>
+                            <th class="table-header fw-semibold text-muted">Duration (Days)</th>
+                            <th class="table-header fw-semibold text-muted">Employee Name</th>
+                            <th class="table-header fw-semibold text-muted">Employee ID</th>
+                            <th class="table-header fw-semibold text-muted">Designation</th>
+                            <th class="table-header fw-semibold text-muted">Reason</th>
+                            <th class="table-header fw-semibold text-muted">Status</th>
                             {% if current_user.is_hr %}
                             <th class="table-header">Actions</th>
                             {% endif %}
@@ -103,12 +108,17 @@
                             <td>{{ (leave.end_date - leave.start_date).days }}</td>
                             <td>{{ leave.employee_name }}</td>
                             <td>{{ leave.employee_id }}</td>
+                            <td>{{ leave.designation }}</td>
                             <td>{{ leave.reason }}</td>
-                            <td class="leave-status status-{{ leave.status.lower() }}">{{ leave.status }}</td>
+                            <td>
+                                <span class="badge rounded-pill bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'warning' }} px-3 py-2">{{ leave.status }}</span>
+                            </td>
                             {% if current_user.is_hr and leave.status == 'Pending' %}
                             <td class="actions">
-                                <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-primary">Approve</a>
-                                <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}" class="btn btn-danger">Reject</a>
+                                <div class="d-flex gap-2">
+                                    <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-sm btn-success hover-scale transition-transform">Approve</a>
+                                    <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}" class="btn btn-sm btn-danger hover-scale transition-transform">Reject</a>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>

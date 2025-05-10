@@ -39,7 +39,14 @@ def init_database():
         # Create admin user if it doesn't exist
         admin = User.query.filter_by(username='admin').first()
         if not admin:
-            admin = User(username='admin', employee_id='ADMIN001', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
+            admin = User(username='admin', name='Administrator', employee_id='ADMIN001', password='Admin@123', is_admin=True, is_hr=True, department='IT Department')
+        
+        # Update existing users to have a default name if they don't have one
+        users = User.query.all()
+        for user in users:
+            if not hasattr(user, 'name') or not user.name:
+                user.name = user.username
+                db.session.add(user)
             db.session.add(admin)
             db.session.commit()
 
@@ -51,7 +58,12 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route('/register', methods=['GET', 'POST'])
+@login_required
 def register():
+    if not current_user.is_admin:
+        flash('Access denied. Admin privileges required.', 'error')
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -70,8 +82,8 @@ def register():
         user = User(username=username, password=password, department=department, employee_id=employee_id, is_hr=is_hr)
         db.session.add(user)
         db.session.commit()
-        flash('Registration successful! Please login.', 'success')
-        return redirect(url_for('login'))
+        flash('User registration successful!', 'success')
+        return redirect(url_for('admin'))
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -125,11 +137,28 @@ def logout():
 @app.route('/profile')
 @login_required
 def profile():
-    leave_count = Leave.query.filter_by(
-        user_id=current_user.id,
-        status='Approved'
-    ).count()
-    return render_template('profile.html', leave_count=leave_count)
+    total_leaves = Leave.query.filter_by(user_id=current_user.id).count()
+    approved_leaves = Leave.query.filter_by(user_id=current_user.id, status='Approved').count()
+    pending_leaves = Leave.query.filter_by(user_id=current_user.id, status='Pending').count()
+    rejected_leaves = Leave.query.filter_by(user_id=current_user.id, status='Rejected').count()
+    
+    return render_template('profile.html',
+                           total_leaves=total_leaves,
+                           approved_leaves=approved_leaves,
+                           pending_leaves=pending_leaves,
+                           rejected_leaves=rejected_leaves)
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    name = request.form.get('name')
+    if name:
+        current_user.name = name
+        db.session.commit()
+        flash('Profile updated successfully', 'success')
+    else:
+        flash('Name cannot be empty', 'error')
+    return redirect(url_for('profile'))
 
 def requires_admin(f):
     @wraps(f)
@@ -146,7 +175,15 @@ def requires_admin(f):
 def admin():
     users = User.query.all()
     leaves = Leave.query.all()
-    return render_template('admin.html', users=users, leaves=leaves)
+    total_leaves = len(leaves)
+    approved_leaves = len([leave for leave in leaves if leave.status == 'Approved'])
+    pending_leaves = len([leave for leave in leaves if leave.status == 'Pending'])
+    rejected_leaves = len([leave for leave in leaves if leave.status == 'Rejected'])
+    return render_template('admin.html', users=users, leaves=leaves,
+                         total_leaves=total_leaves,
+                         approved_leaves=approved_leaves,
+                         pending_leaves=pending_leaves,
+                         rejected_leaves=rejected_leaves)
 
 @app.route('/admin/toggle-role/<int:user_id>', methods=['POST'])
 @login_required
@@ -221,10 +258,12 @@ def apply_leave():
         
         employee_name = request.form['employee_name']
         employee_id = request.form['employee_id']
+        designation = request.form['designation']
         leave = Leave(start_date=start_date, end_date=end_date, 
                      reason=reason, user_id=current_user.id,
                      employee_id=employee_id,
-                     employee_name=employee_name)
+                     employee_name=employee_name,
+                     designation=designation)
         db.session.add(leave)
         db.session.commit()
         flash('Leave application submitted successfully!', 'success')
@@ -342,4 +381,4 @@ def delete_leave_document(document_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5009, debug=True)
