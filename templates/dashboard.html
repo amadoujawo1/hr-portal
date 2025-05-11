@@ -74,48 +74,155 @@
             <div class="card-header bg-white py-4 px-5 border-bottom-0">
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="h4 mb-0 text-primary">Leave Applications</h2>
-                    <a href="{{ url_for('apply_leave') }}" class="btn btn-primary d-flex align-items-center gap-2 hover-scale transition-transform">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        New Leave Request
-                    </a>
+                    <div class="d-flex gap-2">
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('export_leaves_csv') }}" class="btn btn-secondary d-flex align-items-center gap-2 hover-scale transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Export CSV
+                        </a>
+                        <a href="{{ url_for('export_leaves_pdf') }}" class="btn btn-secondary d-flex align-items-center gap-2 hover-scale transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            Export PDF
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('apply_leave') }}" class="btn btn-primary d-flex align-items-center gap-2 hover-scale transition-transform">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            New Leave Request
+                        </a>
+                    </div>
+                </div>
+                <div class="filters mt-4 bg-light p-4 rounded-3 shadow-sm border">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Date Range</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar3" viewBox="0 0 16 16">
+                                                    <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+                                                    <path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                                                </svg>
+                                            </span>
+                                            <input type="date" name="start_date" class="form-control form-control-sm border-start-0" value="{{ request.args.get('start_date', '') }}" placeholder="Start Date">
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text bg-white border-end-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar3" viewBox="0 0 16 16">
+                                                    <path d="M14 0H2a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zM1 3.857C1 3.384 1.448 3 2 3h12c.552 0 1 .384 1 .857v10.286c0 .473-.448.857-1 .857H2c-.552 0-1-.384-1-.857V3.857z"/>
+                                                    <path d="M6.5 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm-9 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm3 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+                                                </svg>
+                                            </span>
+                                            <input type="date" name="end_date" class="form-control form-control-sm border-start-0" value="{{ request.args.get('end_date', '') }}" placeholder="End Date">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Employee Name</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person" viewBox="0 0 16 16">
+                                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z"/>
+                                        </svg>
+                                    </span>
+                                    <input type="text" name="employee_name" class="form-control form-control-sm border-start-0" value="{{ request.args.get('employee_name', '') }}" placeholder="Search name...">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Status</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                        </svg>
+                                    </span>
+                                    <select name="status" class="form-select form-select-sm border-start-0">
+                                        <option value="">All</option>
+                                        <option value="Pending" {% if request.args.get('status') == 'Pending' %}selected{% endif %}>Pending</option>
+                                        <option value="Approved" {% if request.args.get('status') == 'Approved' %}selected{% endif %}>Approved</option>
+                                        <option value="Rejected" {% if request.args.get('status') == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Designation</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-briefcase" viewBox="0 0 16 16">
+                                            <path d="M6.5 1A1.5 1.5 0 0 0 5 2.5V3H1.5A1.5 1.5 0 0 0 0 4.5v8A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-8A1.5 1.5 0 0 0 14.5 3H11v-.5A1.5 1.5 0 0 0 9.5 1h-3zm0 1h3a.5.5 0 0 1 .5.5V3H6v-.5a.5.5 0 0 1 .5-.5zm1.886 6.914L15 7.151V12.5a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5V7.15l6.614 1.764a1.5 1.5 0 0 0 .772 0zM1.5 4h13a.5.5 0 0 1 .5.5v1.616L8.129 7.948a.5.5 0 0 1-.258 0L1 6.116V4.5a.5.5 0 0 1 .5-.5z"/>
+                                        </svg>
+                                    </span>
+                                    <select name="designation" class="form-select form-select-sm border-start-0">
+                                        <option value="">All</option>
+                                        {% for designation in designations %}
+                                        <option value="{{ designation }}" {% if request.args.get('designation') == designation %}selected{% endif %}>{{ designation }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16">
+                                        <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5v-2zm1 .5v1.308l4.372 4.858A.5.5 0 0 1 7 8.5v5.306l2-.666V8.5a.5.5 0 0 1 .128-.334L13.5 3.308V2h-11z"/>
+                                    </svg>
+                                    Apply Filters
+                                </button>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center justify-content-center gap-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16">
+                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                    </svg>
+                                    Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
             
-            <div class="table-container p-5 pt-0">
-                <table class="leave-table table table-hover align-middle mb-0">
+            <div class="table-container p-3 p-md-5 pt-0">
+                <div class="leave-table-wrapper">
+                    <table class="leave-table table table-hover align-middle mb-0 w-100">
                     <thead class="bg-light">
                         <tr>
-                            <th class="table-header fw-semibold text-muted">Start Date</th>
-                            <th class="table-header fw-semibold text-muted">End Date</th>
-                            <th class="table-header fw-semibold text-muted">Duration (Months)</th>
-                            <th class="table-header fw-semibold text-muted">Duration (Days)</th>
-                            <th class="table-header fw-semibold text-muted">Employee Name</th>
-                            <th class="table-header fw-semibold text-muted">Employee ID</th>
-                            <th class="table-header fw-semibold text-muted">Designation</th>
-                            <th class="table-header fw-semibold text-muted">Reason</th>
-                            <th class="table-header fw-semibold text-muted">Status</th>
+                            <th class="table-header fw-semibold text-muted text-center">Start Date</th>
+                            <th class="table-header fw-semibold text-muted text-center">End Date</th>
+                            <th class="table-header fw-semibold text-muted text-center">Duration (Months)</th>
+                            <th class="table-header fw-semibold text-muted text-center">Duration (Days)</th>
+                            <th class="table-header fw-semibold text-muted text-center">Employee Name</th>
+                            <th class="table-header fw-semibold text-muted text-center">Employee ID</th>
+                            <th class="table-header fw-semibold text-muted text-center">Designation</th>
+                            <th class="table-header fw-semibold text-muted text-center">Reason</th>
+                            <th class="table-header fw-semibold text-muted text-center">Status</th>
                             {% if current_user.is_hr %}
-                            <th class="table-header">Actions</th>
+                            <th class="table-header text-center">Actions</th>
                             {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for leave in leaves %}
                         <tr>
-                            <td>{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
-                            <td>{{ ((leave.end_date - leave.start_date).days / 30.44) | round(1) }}</td>
-                            <td>{{ (leave.end_date - leave.start_date).days }}</td>
-                            <td>{{ leave.employee_name }}</td>
-                            <td>{{ leave.employee_id }}</td>
-                            <td>{{ leave.designation }}</td>
-                            <td>{{ leave.reason }}</td>
-                            <td>
+                            <td class="text-center">{{ leave.start_date.strftime('%Y-%m-%d') }}</td>
+                            <td class="text-center">{{ leave.end_date.strftime('%Y-%m-%d') }}</td>
+                            <td class="text-center">{{ ((leave.end_date - leave.start_date).days / 30.44) | round(1) }}</td>
+                            <td class="text-center">{{ (leave.end_date - leave.start_date).days }}</td>
+                            <td class="text-center">{{ leave.employee_name }}</td>
+                            <td class="text-center">{{ leave.employee_id }}</td>
+                            <td class="text-center">{{ leave.designation }}</td>
+                            <td class="text-center">{{ leave.reason }}</td>
+                            <td class="text-center">
                                 <span class="badge rounded-pill bg-{{ 'success' if leave.status == 'Approved' else 'danger' if leave.status == 'Rejected' else 'warning' }} px-3 py-2">{{ leave.status }}</span>
                             </td>
                             {% if current_user.is_hr and leave.status == 'Pending' %}
-                            <td class="actions">
-                                <div class="d-flex gap-2">
+                            <td class="actions text-center">
+                                <div class="d-flex gap-2 justify-content-center">
                                     <a href="{{ url_for('process_leave', id=leave.id, action='approve') }}" class="btn btn-sm btn-success hover-scale transition-transform">Approve</a>
                                     <a href="{{ url_for('process_leave', id=leave.id, action='reject') }}" class="btn btn-sm btn-danger hover-scale transition-transform">Reject</a>
                                 </div>

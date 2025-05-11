@@ -1,5 +1,5 @@
 
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory, make_response, Response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from datetime import datetime
 from functools import wraps
@@ -9,6 +9,12 @@ from database import db
 from models import User, Leave, Document, Notification
 from utils import save_document, delete_document, allowed_file, UPLOAD_FOLDER, requires_admin
 import os
+import csv
+import io
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key'
@@ -242,33 +248,73 @@ def delete_user(user_id):
 @app.route('/')
 @login_required
 def dashboard():
-    if current_user.is_hr:
-        leaves = Leave.query.all()
-    else:
-        leaves = Leave.query.filter_by(user_id=current_user.id).all()
-    return render_template('dashboard.html', leaves=leaves)
+    query = Leave.query
+    
+    if not current_user.is_hr:
+        query = query.filter_by(user_id=current_user.id)
+    
+    # Apply filters
+    if request.args.get('start_date'):
+        query = query.filter(Leave.start_date >= request.args.get('start_date'))
+    if request.args.get('end_date'):
+        query = query.filter(Leave.end_date <= request.args.get('end_date'))
+    if request.args.get('employee_name'):
+        query = query.filter(Leave.employee_name.ilike(f'%{request.args.get("employee_name")}%'))
+    if request.args.get('designation'):
+        query = query.filter(Leave.designation == request.args.get('designation'))
+    if request.args.get('status'):
+        query = query.filter(Leave.status == request.args.get('status'))
+    
+    # Get unique designations for the filter dropdown
+    designations = db.session.query(Leave.designation).distinct().all()
+    designations = [d[0] for d in designations if d[0]]
+    
+    leaves = query.all()
+    return render_template('dashboard.html', leaves=leaves, designations=designations)
 
 @app.route('/apply-leave', methods=['GET', 'POST'])
 @login_required
 def apply_leave():
+    from datetime import date
+    today_date = date.today().strftime('%Y-%m-%d')
     if request.method == 'POST':
         start_date = datetime.strptime(request.form['start_date'], '%Y-%m-%d')
         end_date = datetime.strptime(request.form['end_date'], '%Y-%m-%d')
         reason = request.form['reason']
+        leave_type = request.form['leave_type']
+        duration_months = float(request.form['duration_months'])
+        duration_days = int(request.form['duration_days'])
         
         employee_name = request.form['employee_name']
         employee_id = request.form['employee_id']
         designation = request.form['designation']
-        leave = Leave(start_date=start_date, end_date=end_date, 
+        
+        leave = Leave(start_date=start_date, end_date=end_date,
                      reason=reason, user_id=current_user.id,
                      employee_id=employee_id,
                      employee_name=employee_name,
-                     designation=designation)
+                     designation=designation,
+                     leave_type=leave_type,
+                     duration_months=duration_months,
+                     duration_days=duration_days)
+        
         db.session.add(leave)
         db.session.commit()
+        
+        # Handle document uploads
+        if 'documents[]' in request.files:
+            files = request.files.getlist('documents[]')
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = save_document(file, current_user.id)
+                    if filename:
+                        document = Document(filename=filename, leave_id=leave.id)
+                        db.session.add(document)
+            db.session.commit()
+        
         flash('Leave application submitted successfully!', 'success')
         return redirect(url_for('dashboard'))
-    return render_template('apply_leave.html')
+    return render_template('apply_leave.html', today_date=today_date)
 
 @app.route('/process-leave/<int:id>/<action>')
 @login_required
@@ -375,6 +421,99 @@ def delete_leave_document(document_id):
         db.session.delete(document)
         db.session.commit()
         return jsonify({'success': True})
+
+@app.route('/admin/export-leaves-csv')
+@login_required
+@requires_admin
+def export_leaves_csv():
+    leaves = Leave.query.all()
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Write headers
+    writer.writerow(['Start Date', 'End Date', 'Duration (Months)', 'Duration (Days)', 
+                    'Employee Name', 'Employee ID', 'Designation', 'Reason', 'Status'])
+    
+    # Write data
+    for leave in leaves:
+        writer.writerow([
+            leave.start_date.strftime('%Y-%m-%d'),
+            leave.end_date.strftime('%Y-%m-%d'),
+            round((leave.end_date - leave.start_date).days / 30.44, 1),
+            (leave.end_date - leave.start_date).days,
+            leave.employee_name,
+            leave.employee_id,
+            leave.designation,
+            leave.reason,
+            leave.status
+        ])
+    
+    output.seek(0)
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': 'attachment; filename=leave_applications.csv'}
+    )
+
+@app.route('/admin/export-leaves-pdf')
+@login_required
+@requires_admin
+def export_leaves_pdf():
+    leaves = Leave.query.all()
+    buffer = io.BytesIO()
+    
+    # Create PDF document
+    doc = SimpleDocTemplate(buffer, pagesize=letter)
+    elements = []
+    
+    # Add title
+    styles = getSampleStyleSheet()
+    elements.append(Paragraph('Leave Applications Report', styles['Title']))
+    elements.append(Paragraph(f'Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', styles['Normal']))
+    
+    # Create table data
+    data = [
+        ['Start Date', 'End Date', 'Duration (Months)', 'Duration (Days)', 
+         'Employee Name', 'Employee ID', 'Designation', 'Status']
+    ]
+    
+    for leave in leaves:
+        data.append([
+            leave.start_date.strftime('%Y-%m-%d'),
+            leave.end_date.strftime('%Y-%m-%d'),
+            str(round((leave.end_date - leave.start_date).days / 30.44, 1)),
+            str((leave.end_date - leave.start_date).days),
+            leave.employee_name,
+            leave.employee_id,
+            leave.designation,
+            leave.status
+        ])
+    
+    # Create table and style it
+    table = Table(data)
+    table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 12),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+        ('FONTSIZE', (0, 1), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black)
+    ]))
+    
+    elements.append(table)
+    doc.build(elements)
+    
+    buffer.seek(0)
+    return Response(
+        buffer.getvalue(),
+        mimetype='application/pdf',
+        headers={'Content-Disposition': 'attachment; filename=leave_applications.pdf'}
+    )
     
     return jsonify({'success': False, 'message': 'Failed to delete document'})
 
